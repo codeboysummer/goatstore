@@ -31,10 +31,11 @@ import {
   FiChevronDown,
 } from "react-icons/fi";
 import { SiSololearn } from "react-icons/si";
+import { ChevronDownIcon } from "@chakra-ui/icons";
 
 const LinkItems = [
-  { name: "Home", icon: FiHome },
-  { name: "Trending", icon: FiTrendingUp },
+  { name: "Dashboard", icon: FiHome },
+  { name: "Team", icon: FiTrendingUp },
   { name: "Explore", icon: FiCompass },
   { name: "Favourites", icon: FiStar },
   { name: "Settings", icon: FiSettings },
@@ -85,7 +86,7 @@ const SidebarContent = ({ onClose, ...rest }) => {
       <Flex h="20" alignItems="center" mx="8" justifyContent="space-between">
         <Text fontSize="2xl" fontFamily="monospace" fontWeight="bold">
           <HStack>
-              <SiSololearn /> <Text>Trellow</Text>
+            <SiSololearn /> <Text>Trellow</Text>
           </HStack>
         </Text>
         <CloseButton display={{ base: "flex", md: "none" }} onClick={onClose} />
@@ -95,6 +96,17 @@ const SidebarContent = ({ onClose, ...rest }) => {
           {link.name}
         </NavItem>
       ))}
+      <Flex
+        align="center"
+        p="4"
+        mx="4"
+        borderRadius="lg"
+        role="group"
+        justifyContent={"space-between"}
+      >
+        <p className=" text-gray-400 font-bold"> To do </p>
+        <ChevronDownIcon />
+      </Flex>
     </Box>
   );
 };
