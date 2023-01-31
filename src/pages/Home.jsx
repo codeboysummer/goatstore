@@ -7,9 +7,15 @@ import {
   Button,
   Icon,
 } from "@chakra-ui/react";
+import React from 'react';
+
 import { Link } from "react-router-dom";
 
 export default function Home() {
+    
+      
+    
+    
   return (
     <Container maxW={"5xl"}>
       <Stack

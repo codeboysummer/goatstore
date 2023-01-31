@@ -13,13 +13,72 @@ import {
   Text,
   useColorModeValue,
   Link,
+  useToast,
 } from "@chakra-ui/react";
-import { useState } from "react";
+import { doc, getDoc } from "firebase/firestore";
+import { useCallback, useEffect, useState } from "react";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
+import { useDispatch, useSelector } from "react-redux";
+import { setusernameIsValid, setemail, setpassword } from "../redux/reducers";
+import { debounce } from "lodash";
+import { db, RegisterWithEmailandPassword } from "../firebase/firebase";
+import RegisterationForm from "../components/RegisterationForm";
+import { useNavigate } from "react-router-dom";
 
 export default function Register() {
+  const emailInput = useSelector((state) => state.email.value);
+  const passwordInput = useSelector((state) => state.password.value);
+  const navigate=useNavigate()
+
+  const toast = useToast();
+  const usernameIsValid = useSelector((state) => state.usernameIsValid.value);
+  
+
+  const debouncedUsernameIsValid = debounce(async (username, callback) => {
+    try {
+      if (username.length == 0)
+        return toast({
+          status: "error",
+          duration: 3000,
+          title: "username field is empty!",
+        });
+
+      const docRef = doc(db, "usernames", username);
+      const usernameDoc = await getDoc(docRef);
+      if (usernameDoc.exists()) {
+        // if found then its not valid
+        dispatch(setusernameIsValid(false));
+        console.log(usernameIsValid);
+        toast({ status: "error", duration: 3000, title: "username is taken!" });
+
+        callback(false);
+        return;
+      }
+      // if not found then is valiad
+      dispatch(setusernameIsValid(true));
+      console.log(usernameIsValid);
+      callback(true);
+    } catch (error) {
+      console.log(error);
+      callback(false, error);
+    }
+  }, 500);
+
+  const handleUsernameChange = (username) => {
+    debouncedUsernameIsValid(username, (isValid, error) => {
+      if (error) {
+        console.error(error);
+        return;
+      }
+      console.log(`Username is ${isValid ? "valid" : "not valid"}`);
+    });
+  };
+
   const [showPassword, setShowPassword] = useState(false);
 
+  useEffect(() => {
+    console.log(usernameIsValid);
+  }, [usernameIsValid]);
   return (
     <Flex
       minH={"100vh"}
@@ -44,39 +103,33 @@ export default function Register() {
         >
           <Stack spacing={4}>
             <HStack>
-              <FormControl id="firstName" isRequired>
+              <FormControl id="username" isRequired>
                 <FormLabel>Username</FormLabel>
-                <Input type="text" />
+                <Input
+                  isInvalid={!usernameIsValid}
+                  onChange={(e) => {
+                    handleUsernameChange(e.target.value);
+                  }}
+                  type="text"
+                />
               </FormControl>
             </HStack>
-            <FormControl id="email" isRequired>
-              <FormLabel>Email address</FormLabel>
-              <Input type="email" />
-            </FormControl>
-            <FormControl id="password" isRequired>
-              <FormLabel>Password</FormLabel>
-              <InputGroup>
-                <Input type={showPassword ? "text" : "password"} />
-                <InputRightElement h={"full"}>
-                  <Button
-                    variant={"ghost"}
-                    onClick={() =>
-                      setShowPassword((showPassword) => !showPassword)
-                    }
-                  >
-                    {showPassword ? <ViewIcon /> : <ViewOffIcon />}
-                  </Button>
-                </InputRightElement>
-              </InputGroup>
-            </FormControl>
+
+            <RegisterationForm/>
+           
+           
             <Stack spacing={10} pt={2}>
               <Button
+                isDisabled={!usernameIsValid}
                 loadingText="Submitting"
                 size="lg"
                 bg={"blue.400"}
                 color={"white"}
                 _hover={{
                   bg: "blue.500",
+                }}
+                onClick={() => {
+                  RegisterWithEmailandPassword(emailInput, passwordInput,navigate);
                 }}
               >
                 Sign up
