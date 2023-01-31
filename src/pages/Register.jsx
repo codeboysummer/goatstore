@@ -21,18 +21,21 @@ import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import { useDispatch, useSelector } from "react-redux";
 import { setusernameIsValid, setemail, setpassword } from "../redux/reducers";
 import { debounce } from "lodash";
-import { db, RegisterWithEmailandPassword } from "../firebase/firebase";
+import { auth, db, RegisterWithEmailandPassword } from "../firebase/firebase";
 import RegisterationForm from "../components/RegisterationForm";
 import { useNavigate } from "react-router-dom";
+import { useAuthState } from "react-firebase-hooks/auth";
 
 export default function Register() {
+  const UserAuth = useAuthState(auth);
+  const Username = useSelector((state) => state.username.value);
+
   const emailInput = useSelector((state) => state.email.value);
   const passwordInput = useSelector((state) => state.password.value);
-  const navigate=useNavigate()
+  const navigate = useNavigate();
 
   const toast = useToast();
   const usernameIsValid = useSelector((state) => state.usernameIsValid.value);
-  
 
   const debouncedUsernameIsValid = debounce(async (username, callback) => {
     try {
@@ -79,6 +82,10 @@ export default function Register() {
   useEffect(() => {
     console.log(usernameIsValid);
   }, [usernameIsValid]);
+  useEffect(() => {
+    if (UserAuth) navigate("/dashboard");
+    if (!UserAuth) navigate("login");
+  }, [UserAuth]);
   return (
     <Flex
       minH={"100vh"}
@@ -115,9 +122,8 @@ export default function Register() {
               </FormControl>
             </HStack>
 
-            <RegisterationForm/>
-           
-           
+            <RegisterationForm />
+
             <Stack spacing={10} pt={2}>
               <Button
                 isDisabled={!usernameIsValid}
@@ -129,7 +135,12 @@ export default function Register() {
                   bg: "blue.500",
                 }}
                 onClick={() => {
-                  RegisterWithEmailandPassword(emailInput, passwordInput,navigate);
+                  RegisterWithEmailandPassword(
+                    emailInput,
+                    passwordInput,
+                    Username,
+                    navigate
+                  );
                 }}
               >
                 Sign up

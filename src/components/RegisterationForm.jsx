@@ -1,15 +1,25 @@
-import React,{useState} from 'react'
+import React, { useState } from "react";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
-import { Button, FormControl, FormLabel, InputGroup, InputRightElement,Input } from "@chakra-ui/react";
+import {
+  Button,
+  FormControl,
+  FormLabel,
+  InputGroup,
+  InputRightElement,
+  Input,
+} from "@chakra-ui/react";
 import { useDispatch, useSelector } from "react-redux";
 import { setemail, setpassword } from "../redux/reducers";
-import { useNavigate } from 'react-router-dom';
-
+import { useNavigate } from "react-router-dom";
+import { useAuthState } from "react-firebase-hooks/auth";
 const RegisterationForm = () => {
+    const usernameIsValid = useSelector((state) => state.usernameIsValid.value);
+
   const emailInput = useSelector((state) => state.email.value);
   const passwordInput = useSelector((state) => state.password.value);
   const dispatch = useDispatch();
-  const [showPassword, setShowPassword] = useState(false)
+  const [showPassword, setShowPassword] = useState(false);
+
 
   return (
     <>

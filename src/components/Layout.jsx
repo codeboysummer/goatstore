@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { signOut } from "firebase/auth";
 import {
   IconButton,
   Avatar,
@@ -32,6 +33,9 @@ import {
 } from "react-icons/fi";
 import { SiSololearn } from "react-icons/si";
 import { ChevronDownIcon } from "@chakra-ui/icons";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth } from "../firebase/firebase";
+import { useNavigate } from "react-router-dom";
 
 const LinkItems = [
   { name: "Dashboard", icon: FiHome },
@@ -42,7 +46,15 @@ const LinkItems = [
 ];
 
 export default function Layout({ children }) {
+  const navigate = useNavigate();
+  const authState = useAuthState(auth);
   const { isOpen, onOpen, onClose } = useDisclosure();
+
+  useEffect(() => {
+    if (!authState[0]) navigate("/signin");
+    console.log(authState);
+  }, [authState]);
+
   return (
     <Box minH="100vh" bg={useColorModeValue("gray.100", "gray.900")}>
       <SidebarContent
@@ -222,7 +234,7 @@ const MobileNav = ({ onOpen, ...rest }) => {
               <MenuItem>Settings</MenuItem>
               <MenuItem>Billing</MenuItem>
               <MenuDivider />
-              <MenuItem>Sign out</MenuItem>
+              <MenuItem onClick={() => signOut(auth)}>Sign out</MenuItem>
             </MenuList>
           </Menu>
         </Flex>

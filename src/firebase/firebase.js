@@ -19,7 +19,7 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+export const auth = getAuth(app);
 export const db = getFirestore(app);
 
 // helper functions
@@ -35,17 +35,30 @@ export const SigninWithEmailandPassword = async (email, password) => {
   }
 };
 
+export const createUsername = async (username, email) => {
+  try {
+    const docRef = await addDoc(collection(db, "usernames", username), {
+      uid: uid,
+    });
+    console.log(docRef);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 export const RegisterWithEmailandPassword = async (
   email,
   password,
+  username,
   navigate
 ) => {
   // firebase function
   try {
-    createUserWithEmailAndPassword(auth, email, password);
+    await createUserWithEmailAndPassword(auth, email, password);
+    await createUsername(username, email).then(() => console.log("it worked"));
     if (auth.currentUser) console.log(error);
 
-    if (navigate) navigate("/dashboard");
+    if (auth.currentUser) navigate("/dashboard");
   } catch (error) {
     console.log(error);
   }
