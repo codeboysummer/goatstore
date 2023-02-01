@@ -58,7 +58,7 @@ export const RegisterWithEmailandPassword = async (
     await createUsername(username, email).then(() => console.log("it worked"));
     if (auth.currentUser) console.log(error);
 
-    if (auth.currentUser) navigate("/dashboard");
+    if (!auth.currentUser==null) navigate("/dashboard");
   } catch (error) {
     console.log(error);
   }

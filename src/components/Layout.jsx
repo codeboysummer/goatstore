@@ -49,11 +49,9 @@ export default function Layout({ children }) {
   const navigate = useNavigate();
   const authState = useAuthState(auth);
   const { isOpen, onOpen, onClose } = useDisclosure();
+  
 
-  useEffect(() => {
-    if (!authState[0]) navigate("/signin");
-    console.log(authState);
-  }, [authState]);
+ 
 
   return (
     <Box minH="100vh" bg={useColorModeValue("gray.100", "gray.900")}>

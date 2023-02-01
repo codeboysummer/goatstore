@@ -82,10 +82,11 @@ export default function Register() {
   useEffect(() => {
     console.log(usernameIsValid);
   }, [usernameIsValid]);
+
   useEffect(() => {
     if (UserAuth) navigate("/dashboard");
-    if (!UserAuth) navigate("login");
   }, [UserAuth]);
+  
   return (
     <Flex
       minH={"100vh"}
