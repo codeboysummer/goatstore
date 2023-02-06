@@ -1,12 +1,19 @@
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
-import { getFirestore } from "firebase/firestore";
+import {
+  addDoc,
+  getFirestore,
+  collection,
+  doc,
+  writeBatch,
+} from "firebase/firestore";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
 } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
+import { useAuthState } from "react-firebase-hooks/auth";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAxZ-rZgCwF8zJPAJFTbe0qp-K9uLmFgc8",
@@ -22,46 +29,12 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 
+
 // helper functions
 
-// AUTH
 
-export const SigninWithEmailandPassword = async (email, password) => {
-  // firebase function
-  try {
-    await signInWithEmailAndPassword(auth, email, password);
-  } catch (error) {
-    console.log(error);
-  }
-};
+export const googleAuthProvider=new GoogleAuthProvider()// AUTH
 
-export const createUsername = async (username, email) => {
-  try {
-    const docRef = await addDoc(collection(db, "usernames", username), {
-      uid: uid,
-    });
-    console.log(docRef);
-  } catch (error) {
-    console.log(error);
-  }
-};
 
-export const RegisterWithEmailandPassword = async (
-  email,
-  password,
-  username,
-  navigate
-) => {
-  // firebase function
-  try {
-    await createUserWithEmailAndPassword(auth, email, password);
-    await createUsername(username, email).then(() => console.log("it worked"));
-    if (auth.currentUser) console.log(error);
-
-    if (!auth.currentUser==null) navigate("/dashboard");
-  } catch (error) {
-    console.log(error);
-  }
-};
 
 // need debounce function to check for username

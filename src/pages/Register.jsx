@@ -1,160 +1,215 @@
+import { doc, getDoc, writeBatch } from "firebase/firestore";
+import { signInWithPopup } from "firebase/auth";
+import { useEffect, useState, useCallback, useContext } from "react";
+import debounce from "lodash/debounce";
 import {
-  Flex,
   Box,
-  FormControl,
-  FormLabel,
-  Input,
-  InputGroup,
-  HStack,
-  InputRightElement,
-  Stack,
   Button,
   Heading,
-  Text,
-  useColorModeValue,
-  Link,
+  Image,
+  Input,
   useToast,
+  VStack,
 } from "@chakra-ui/react";
-import { doc, getDoc } from "firebase/firestore";
-import { useCallback, useEffect, useState } from "react";
-import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import { useDispatch, useSelector } from "react-redux";
-import { setusernameIsValid, setemail, setpassword } from "../redux/reducers";
-import { debounce } from "lodash";
-import { auth, db, RegisterWithEmailandPassword } from "../firebase/firebase";
-import RegisterationForm from "../components/RegisterationForm";
-import { useNavigate } from "react-router-dom";
+import { auth, db, googleAuthProvider } from "../firebase/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
-
-export default function Register() {
-  const UserAuth = useAuthState(auth);
-  const Username = useSelector((state) => state.username.value);
-
-  const emailInput = useSelector((state) => state.email.value);
-  const passwordInput = useSelector((state) => state.password.value);
+import { Navigate, useNavigate } from "react-router-dom";
+import { useUserData } from "../hooks/useUserData";
+import { setUsername } from "../redux/reducers";
+export default function Enter() {
   const navigate = useNavigate();
-
-  const toast = useToast();
-  const usernameIsValid = useSelector((state) => state.usernameIsValid.value);
-
-  const debouncedUsernameIsValid = debounce(async (username, callback) => {
-    try {
-      if (username.length == 0)
-        return toast({
-          status: "error",
-          duration: 3000,
-          title: "username field is empty!",
-        });
-
-      const docRef = doc(db, "usernames", username);
-      const usernameDoc = await getDoc(docRef);
-      if (usernameDoc.exists()) {
-        // if found then its not valid
-        dispatch(setusernameIsValid(false));
-        console.log(usernameIsValid);
-        toast({ status: "error", duration: 3000, title: "username is taken!" });
-
-        callback(false);
-        return;
-      }
-      // if not found then is valiad
-      dispatch(setusernameIsValid(true));
-      console.log(usernameIsValid);
-      callback(true);
-    } catch (error) {
-      console.log(error);
-      callback(false, error);
+  // const { user, username } = useUserData();
+  const dispatch = useDispatch();
+  const username = useSelector((state) => state.username.value);
+  const [user] = useAuthState(auth);
+  useEffect(() => {
+    if (username) {
+      navigate("/dashboard");
     }
-  }, 500);
+  }, [username]);
 
-  const handleUsernameChange = (username) => {
-    debouncedUsernameIsValid(username, (isValid, error) => {
-      if (error) {
-        console.error(error);
-        return;
+  const alreadyExistingUser = async () => {
+    try {
+      const ref = doc(db, "users", user.uid);
+      const docSnap = await getDoc(ref);
+      if (docSnap.exists()) {
+        // Convert to City object
+        console.log(docSnap.data());
+        // Use a City instance method
+        const { username } = docSnap.data();
+        dispatch(setUsername(username));
+        console.log(username);
+      } else {
+        console.log("No such document!");
       }
-      console.log(`Username is ${isValid ? "valid" : "not valid"}`);
-    });
+    } catch (error) {}
+  };
+  useEffect(() => {
+    if (user) {
+      const { usernameExists, username } = alreadyExistingUser(user);
+      console.log(usernameExists, username);
+    }
+  }, [user]);
+
+  // 1. user signed out <SignInButton />
+  // 2. user signed in, but missing username <UsernameForm />
+  // 3. user signed in, has username <SignOutButton />
+  return (
+    <VStack mt={"20%"}>
+      {user ? (
+        !username ? (
+          <UsernameForm />
+        ) : (
+          <>hello {username}</>
+        )
+      ) : (
+        <VStack mt={"5%"}>
+          <Heading>Signin with google</Heading>
+          <SignInButton />
+        </VStack>
+      )}
+    </VStack>
+  );
+}
+
+// Sign in with Google button
+function SignInButton() {
+  const toast = useToast();
+  const signInWithGoogle = async () => {
+    try {
+      await signInWithPopup(auth, googleAuthProvider);
+      toast({
+        status: "success",
+        title: "welcome to HotTakes",
+        duration: 2000,
+      });
+    } catch (error) {}
   };
 
-  const [showPassword, setShowPassword] = useState(false);
-
-  useEffect(() => {
-    console.log(usernameIsValid);
-  }, [usernameIsValid]);
-
-  useEffect(() => {
-    if (UserAuth) navigate("/dashboard");
-  }, [UserAuth]);
-  
   return (
-    <Flex
-      minH={"100vh"}
-      align={"center"}
-      justify={"center"}
-      bg={useColorModeValue("gray.50", "gray.800")}
-    >
-      <Stack spacing={8} mx={"auto"} maxW={"lg"} py={12} px={6}>
-        <Stack align={"center"}>
-          <Heading fontSize={"4xl"} textAlign={"center"}>
-            Sign up
-          </Heading>
-          <Text fontSize={"lg"} color={"gray.600"}>
-            to enjoy all of our cool features ✌️
-          </Text>
-        </Stack>
-        <Box
-          rounded={"lg"}
-          bg={useColorModeValue("white", "gray.700")}
-          boxShadow={"lg"}
-          p={8}
-        >
-          <Stack spacing={4}>
-            <HStack>
-              <FormControl id="username" isRequired>
-                <FormLabel>Username</FormLabel>
-                <Input
-                  isInvalid={!usernameIsValid}
-                  onChange={(e) => {
-                    handleUsernameChange(e.target.value);
-                  }}
-                  type="text"
-                />
-              </FormControl>
-            </HStack>
-
-            <RegisterationForm />
-
-            <Stack spacing={10} pt={2}>
-              <Button
-                isDisabled={!usernameIsValid}
-                loadingText="Submitting"
-                size="lg"
-                bg={"blue.400"}
-                color={"white"}
-                _hover={{
-                  bg: "blue.500",
-                }}
-                onClick={() => {
-                  RegisterWithEmailandPassword(
-                    emailInput,
-                    passwordInput,
-                    Username,
-                    navigate
-                  );
-                }}
-              >
-                Sign up
-              </Button>
-            </Stack>
-            <Stack pt={6}>
-              <Text align={"center"}>
-                Already a user? <Link color={"blue.400"}>Login</Link>
-              </Text>
-            </Stack>
-          </Stack>
-        </Box>
-      </Stack>
-    </Flex>
+    <Button className="btn-google" onClick={signInWithGoogle}>
+      <Image alt="" src={"/google.png"} width="30px" /> Sign in with Google
+    </Button>
   );
+}
+
+// Sign out button
+
+// Username form
+function UsernameForm() {
+  const [formValue, setFormValue] = useState("");
+  const [isValid, setIsValid] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  // const { user, username } = useUserData();
+  const username = useSelector((state) => state.username.value);
+  const [user] = useAuthState(auth);
+  const onSubmit = async (e) => {
+    e.preventDefault();
+
+    // Create refs for both documents
+    try {
+      const userDoc = doc(db, `users/${user.uid}`);
+      const usernameDoc = doc(db, `usernames/${formValue}`);
+
+      // Commit both docs together as a batch write.
+      const batch = writeBatch(db);
+      batch.set(userDoc, {
+        username: formValue,
+        photoURL: user.photoURL,
+        displayName: user.displayName,
+      });
+      batch.set(usernameDoc, { uid: user.uid });
+
+      await batch.commit();
+      
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const onChange = (e) => {
+    // Force form value typed in form to match correct format
+    const val = e.target.value.toLowerCase();
+    const re = /^(?=[a-zA-Z0-9._]{3,15}$)(?!.*[_.]{2})[^_.].*[^_.]$/;
+
+    // Only set form value if length is < 3 OR it passes regex
+    if (val.length < 3) {
+      setFormValue(val);
+      setLoading(false);
+      setIsValid(false);
+    }
+
+    if (re.test(val)) {
+      setFormValue(val);
+      setLoading(true);
+      setIsValid(false);
+    }
+  };
+
+  //
+
+  useEffect(() => {
+    checkUsername(formValue);
+  }, [formValue]);
+
+  // Hit the database for username match after each debounced change
+  // useCallback is required for debounce to work
+  const checkUsername = useCallback(
+    debounce(async (username) => {
+      if (username.length >= 3) {
+        const ref = doc(db, `usernames/${username}`);
+        const docSnap = await getDoc(ref);
+        const exists = docSnap.exists();
+        setIsValid(!exists);
+        setLoading(false);
+      }
+    }, 500),
+    []
+  );
+
+  return (
+    !username && (
+      <Box>
+        <Heading>Choose Username</Heading>
+        <form onSubmit={onSubmit}>
+          <Input
+            name="username"
+            placeholder="myname"
+            value={formValue}
+            onChange={onChange}
+          />
+          <UsernameMessage
+            username={formValue}
+            isValid={isValid}
+            loading={loading}
+          />
+          <Button type="submit" className="btn-green" disabled={!isValid}>
+            Choose
+          </Button>
+
+          <Box>
+            Username: {formValue}
+            Username Valid:{" "}
+            {isValid.toString()
+              ? "this username is ready to take"
+              : "this username is taken"}
+          </Box>
+        </form>
+      </Box>
+    )
+  );
+}
+
+function UsernameMessage({ username, isValid, loading }) {
+  if (loading) {
+    return <p>Checking...</p>;
+  } else if (isValid) {
+    return <p className="text-success">{username} is available!</p>;
+  } else if (username && !isValid) {
+    return <p className="text-danger">That username is taken!</p>;
+  } else {
+    return <p></p>;
+  }
 }
