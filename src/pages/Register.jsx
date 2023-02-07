@@ -45,11 +45,13 @@ export default function Enter() {
       }
     } catch (error) {}
   };
+  
   useEffect(() => {
     if (user) {
       const { usernameExists, username } = alreadyExistingUser(user);
       console.log(usernameExists, username);
     }
+    console.log(user);
   }, [user]);
 
   // 1. user signed out <SignInButton />
@@ -84,7 +86,9 @@ function SignInButton() {
         title: "welcome to HotTakes",
         duration: 2000,
       });
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -123,7 +127,6 @@ function UsernameForm() {
       batch.set(usernameDoc, { uid: user.uid });
 
       await batch.commit();
-      
     } catch (error) {
       console.log(error);
     }
