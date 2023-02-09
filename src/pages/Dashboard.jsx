@@ -30,7 +30,8 @@ const Dashboard = () => {
 
   return (
     <Layout>
-      <TrelloCard />
+      
+      <TrelloCard data={sampleData}/>
     </Layout>
   );
 };

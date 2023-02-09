@@ -1,8 +1,9 @@
 import { AddIcon, ChatIcon, CheckCircleIcon, CheckIcon } from "@chakra-ui/icons";
 import { Avatar, Box, Flex, HStack, Tag, VStack } from "@chakra-ui/react";
 import React from "react";
-const Card = () => {
+const Card = ({cards}) => {
   const [active, setactive] = React.useState(false);
+  
   return (
     <VStack
       p={2}
