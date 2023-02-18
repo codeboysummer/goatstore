@@ -24,11 +24,8 @@ import { useEffect, useState } from "react";
 import SlideInOut from "../animations/SlideInOut";
 import MultiStepForm from "./MultistepForm";
 
-export function ChakraModal({ children }) {
+export function ChakraModal({ children, title }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
-
-
-
 
   return (
     <>
@@ -41,12 +38,9 @@ export function ChakraModal({ children }) {
           <ModalHeader> New card </ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <MultiStepForm/>
+            <MultiStepForm title={title} />
           </ModalBody>
-          <ModalFooter>
-            
-
-          </ModalFooter>
+          <ModalFooter></ModalFooter>
         </ModalContent>
       </Modal>
     </>

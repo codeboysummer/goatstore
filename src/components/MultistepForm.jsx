@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Progress,
   Box,
@@ -18,162 +18,93 @@ import {
   FormHelperText,
   InputRightElement,
   Stack,
-} from '@chakra-ui/react';
+  Tag,
+} from "@chakra-ui/react";
 
-import { useToast } from '@chakra-ui/react';
+import { useToast } from "@chakra-ui/react";
+import { addTag, setcardName, setTags } from "../redux/reducers";
+import { useDispatch, useSelector } from "react-redux";
+import { debounce } from "lodash";
+import randomColor from "randomcolor";
+import { ref, update } from "firebase/database";
+import { auth, RealtimeDB } from "../firebase/firebase";
+import { useAuthState } from "react-firebase-hooks/auth";
 
 const Form1 = () => {
   const [show, setShow] = React.useState(false);
   const handleClick = () => setShow(!show);
+
+  const dispatch = useDispatch();
+  const handleChange = (event) => {
+    dispatch(setcardName(event.target.value));
+  };
+
   return (
     <>
-      <Heading w="100%" textAlign={'center'} fontWeight="normal" mb="2%">
+      <Heading w="100%" textAlign={"center"} fontWeight="normal" mb="2%">
         Card name
-
-
       </Heading>
       <Stack>
         <FormLabel>Card Name</FormLabel>
-        <Input  type={'text' }placeholder={'enter your card name'}/>
+        <Input
+          onChange={(e) => handleChange(e)}
+          type={"text"}
+          placeholder={"enter your card name"}
+        />
       </Stack>
-
-        
     </>
   );
 };
 
 const Form2 = () => {
+  const dispatch = useDispatch();
+
+  const toast = useToast();
+  const tags = useSelector((state) => state.tags.value);
+  useEffect(() => {
+    console.log("tags:", tags);
+  }, [tags]);
+
+  const handleChange = useCallback(
+    debounce(async (event) => {
+      const { value } = event.target;
+      if (tags.length > 4) {
+        return toast({ title: "limit of 5 reached" });
+      }
+      if (!value || value.length <= 2) {
+        return toast({ title: "invalid input" });
+      }
+
+      dispatch(addTag(value));
+      setTimeout(() => {}, 300); // dispatch the 'addTag' action with the input value
+    }, 500),
+    []
+  );
+
   return (
     <>
-      <Heading w="100%" textAlign={'center'} fontWeight="normal" mb="2%">
-        User Details
+      <Heading w="100%" textAlign={"center"} fontWeight="normal" mb="2%">
+        Tags
       </Heading>
-      <FormControl as={GridItem} colSpan={[6, 3]}>
-        <FormLabel
-          htmlFor="country"
-          fontSize="sm"
-          fontWeight="md"
-          color="gray.700"
-          _dark={{
-            color: 'gray.50',
-          }}>
-          Country / Region
-        </FormLabel>
-        <Select
-          id="country"
-          name="country"
-          autoComplete="country"
-          placeholder="Select option"
-          focusBorderColor="brand.400"
-          shadow="sm"
-          size="sm"
-          w="full"
-          rounded="md">
-          <option>United States</option>
-          <option>Canada</option>
-          <option>Mexico</option>
-        </Select>
-      </FormControl>
-
-      <FormControl as={GridItem} colSpan={6}>
-        <FormLabel
-          htmlFor="street_address"
-          fontSize="sm"
-          fontWeight="md"
-          color="gray.700"
-          _dark={{
-            color: 'gray.50',
-          }}
-          mt="2%">
-          Street address
-        </FormLabel>
+      <Stack gap={4}>
         <Input
-          type="text"
-          name="street_address"
-          id="street_address"
-          autoComplete="street-address"
-          focusBorderColor="brand.400"
-          shadow="sm"
-          size="sm"
-          w="full"
-          rounded="md"
-        />
-      </FormControl>
-
-      <FormControl as={GridItem} colSpan={[6, 6, null, 2]}>
-        <FormLabel
-          htmlFor="city"
-          fontSize="sm"
-          fontWeight="md"
-          color="gray.700"
-          _dark={{
-            color: 'gray.50',
+          onChange={(e) => {
+            handleChange(e);
           }}
-          mt="2%">
-          City
-        </FormLabel>
-        <Input
-          type="text"
-          name="city"
-          id="city"
-          autoComplete="city"
-          focusBorderColor="brand.400"
-          shadow="sm"
-          size="sm"
-          w="full"
-          rounded="md"
         />
-      </FormControl>
-
-      <FormControl as={GridItem} colSpan={[6, 3, null, 2]}>
-        <FormLabel
-          htmlFor="state"
-          fontSize="sm"
-          fontWeight="md"
-          color="gray.700"
-          _dark={{
-            color: 'gray.50',
-          }}
-          mt="2%">
-          State / Province
-        </FormLabel>
-        <Input
-          type="text"
-          name="state"
-          id="state"
-          autoComplete="state"
-          focusBorderColor="brand.400"
-          shadow="sm"
-          size="sm"
-          w="full"
-          rounded="md"
-        />
-      </FormControl>
-
-      <FormControl as={GridItem} colSpan={[6, 3, null, 2]}>
-        <FormLabel
-          htmlFor="postal_code"
-          fontSize="sm"
-          fontWeight="md"
-          color="gray.700"
-          _dark={{
-            color: 'gray.50',
-          }}
-          mt="2%">
-          ZIP / Postal
-        </FormLabel>
-        <Input
-          type="text"
-          name="postal_code"
-          id="postal_code"
-          autoComplete="postal-code"
-          focusBorderColor="brand.400"
-          shadow="sm"
-          size="sm"
-          w="full"
-          rounded="md"
-        />
-      </FormControl>
+        <Flex>
+          {tags?.map((item) => (
+            <Tag
+              m={0.5}
+              w={"fit-content"}
+              color={"white"}
+              bg={randomColor({ luminosity: "dark" })}
+            >
+              {item}
+            </Tag>
+          ))}
+        </Flex>
+      </Stack>
     </>
   );
 };
@@ -181,71 +112,47 @@ const Form2 = () => {
 const Form3 = () => {
   return (
     <>
-      <Heading w="100%" textAlign={'center'} fontWeight="normal">
+      <Heading w="100%" textAlign={"center"} fontWeight="normal">
         Social Handles
       </Heading>
-      <SimpleGrid columns={1} spacing={6}>
-        <FormControl as={GridItem} colSpan={[3, 2]}>
-          <FormLabel
-            fontSize="sm"
-            fontWeight="md"
-            color="gray.700"
-            _dark={{
-              color: 'gray.50',
-            }}>
-            Website
-          </FormLabel>
-          <InputGroup size="sm">
-            <InputLeftAddon
-              bg="gray.50"
-              _dark={{
-                bg: 'gray.800',
-              }}
-              color="gray.500"
-              rounded="md">
-              http://
-            </InputLeftAddon>
-            <Input
-              type="tel"
-              placeholder="www.example.com"
-              focusBorderColor="brand.400"
-              rounded="md"
-            />
-          </InputGroup>
-        </FormControl>
-
-        <FormControl id="email" mt={1}>
-          <FormLabel
-            fontSize="sm"
-            fontWeight="md"
-            color="gray.700"
-            _dark={{
-              color: 'gray.50',
-            }}>
-            About
-          </FormLabel>
-          <Textarea
-            placeholder="you@example.com"
-            rows={3}
-            shadow="sm"
-            focusBorderColor="brand.400"
-            fontSize={{
-              sm: 'sm',
-            }}
-          />
-          <FormHelperText>
-            Brief description for your profile. URLs are hyperlinked.
-          </FormHelperText>
-        </FormControl>
-      </SimpleGrid>
     </>
   );
 };
 
-export default function MultiStepForm() {
+export default function MultiStepForm({ title }) {
   const toast = useToast();
   const [step, setStep] = useState(1);
   const [progress, setProgress] = useState(33.33);
+  const [user] = useAuthState(auth);
+  const tags = useSelector((state) => state.tags.value);
+  const cardName = useSelector((state) => state.cardName.value);
+  const cardCompeleted = useSelector((state) => state.cardCompleted.value);
+  useEffect(() => {
+    console.log(title, cardName, cardCompeleted, tags);
+  }, [cardName]);
+
+  function onSubmit() {
+    const CreatedCard = {
+      title,
+
+      cards: [
+        {
+          cardName,
+          cardCompeleted,
+          tags,
+        },
+      ],
+    };
+    try {
+      update(ref(RealtimeDB, `${user?.uid}/lists/${title}`), {
+        title,
+        CreatedCard,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   return (
     <>
       <Box
@@ -253,15 +160,17 @@ export default function MultiStepForm() {
         rounded="lg"
         maxWidth={800}
         p={6}
-        outline={'none'}
+        outline={"none"}
         m="10px auto"
-        as="form">
+        as="form"
+      >
         <Progress
           hasStripe
           value={progress}
           mb="5%"
           mx="5%"
-          isAnimated></Progress>
+          isAnimated
+        ></Progress>
         {step === 1 ? <Form1 /> : step === 2 ? <Form2 /> : <Form3 />}
         <ButtonGroup mt="5%" w="100%">
           <Flex w="100%" justifyContent="space-between">
@@ -275,7 +184,8 @@ export default function MultiStepForm() {
                 colorScheme="teal"
                 variant="solid"
                 w="7rem"
-                mr="5%">
+                mr="5%"
+              >
                 Back
               </Button>
               <Button
@@ -290,7 +200,8 @@ export default function MultiStepForm() {
                   }
                 }}
                 colorScheme="teal"
-                variant="outline">
+                variant="outline"
+              >
                 Next
               </Button>
             </Flex>
@@ -299,15 +210,17 @@ export default function MultiStepForm() {
                 w="7rem"
                 colorScheme="red"
                 variant="solid"
-                onClick={() => {
+                onClick={async () => {
+                  onSubmit(title);
                   toast({
-                    title: 'Account created.',
+                    title: "Account created.",
                     description: "We've created your account for you.",
-                    status: 'success',
+                    status: "success",
                     duration: 3000,
                     isClosable: true,
                   });
-                }}>
+                }}
+              >
                 Submit
               </Button>
             ) : null}
