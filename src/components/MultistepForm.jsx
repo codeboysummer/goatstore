@@ -119,7 +119,7 @@ const Form3 = () => {
   );
 };
 
-export default function MultiStepForm({ title }) {
+export default function MultiStepForm({ title, cards, cardsEmpty }) {
   const toast = useToast();
   const [step, setStep] = useState(1);
   const [progress, setProgress] = useState(33.33);
@@ -132,17 +132,31 @@ export default function MultiStepForm({ title }) {
   }, [cardName]);
 
   function onSubmit() {
-    const CreatedCard = {
-      title,
+    const CreatedCard = cardsEmpty
+      ? {
+          title,
 
-      cards: [
-        {
-          cardName,
-          cardCompeleted,
-          tags,
-        },
-      ],
-    };
+          cards: [
+            {
+              cardName,
+              cardCompeleted,
+              tags,
+            },
+          ],
+        }
+      : {
+          title,
+
+          cards: [
+            ...cards,
+            {
+              cardName,
+              cardCompeleted,
+              tags,
+            },
+          ],
+        };
+
     try {
       update(ref(RealtimeDB, `${user?.uid}/lists/${title}`), {
         title,

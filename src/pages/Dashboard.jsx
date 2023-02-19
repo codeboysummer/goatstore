@@ -3,10 +3,12 @@ import {
   Box,
   Button,
   Flex,
+  HStack,
   IconButton,
   Input,
   InputGroup,
   InputRightElement,
+  Stack,
   useDisclosure,
   useToast,
 } from "@chakra-ui/react";
@@ -29,25 +31,6 @@ const Dashboard = () => {
   const [user] = useAuthState(auth);
   const navigate = useNavigate();
   const [lists, setlists] = useState([]);
-
-  // if (!authstate) navigate("/register");
-  // React.useEffect(() => {
-  //   console.log(authstate);
-  // }, [authstate]);
-
-  // const sampleData = [
-  //   {
-  //     title: "💡 Ideas",
-  //     cards: [
-  //       {
-  //         name: "create new react components",
-  //         completed: false,
-  //         tags: [{ name: "figma", color: "red" }],
-  //         notes: [{ username: "usernames", note: "finish this project pls" }],
-  //       },
-  //     ],
-  //   },
-  // ];
 
   useEffect(() => {
     if (!user) {
@@ -83,8 +66,9 @@ const Dashboard = () => {
 
   return (
     <Layout>
-      <Flex w={"100%"} gap={4} flexWrap={"wrap"}>
+      <div className="flex flex-wrap gap-4">
         {/* <TrelloCard data={sampleData} /> */}
+
         {lists?.map((item) => (
           <TrelloCard TrelloCardData={item} />
         ))}
@@ -98,13 +82,14 @@ const Dashboard = () => {
             icon={<AddIcon />}
           />
         </CreateList>
-      </Flex>
+      </div>
     </Layout>
   );
 };
 
 export default Dashboard;
 
+// this is the blue button in the corner
 function CreateList({ children }) {
   const [showInput, setshowInput] = useState(false);
   const [user] = useAuthState(auth);

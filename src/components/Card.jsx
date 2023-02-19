@@ -10,9 +10,9 @@ import React from "react";
 const Card = ({ card }) => {
   const [active, setactive] = React.useState(false);
   const { cardName, cardCompleted, tags } = card;
-  // React.useEffect(() => {
-  //   console.log(cards);
-  // }, []);
+  React.useEffect(() => {
+    console.log("card", card);
+  }, []);
 
   return (
     <VStack
@@ -40,13 +40,17 @@ const Card = ({ card }) => {
           />
         )}
       </Flex>
-      <HStack alignSelf={"start"}>
+      <Flex w={"100%"} flexWrap={"wrap"} gap={1} alignItems={"flex-start"}>
         {tags.map((item) => (
-          <Tag color={"white"} bg={randomColor({ luminosity: "dark" })}>
+          <Tag
+            key={item}
+            color={"white"}
+            bg={randomColor({ luminosity: "dark" })}
+          >
             {item}
           </Tag>
         ))}
-      </HStack>
+      </Flex>
       <Flex w={"100%"} alignItems={"center"} alignSelf={"start"}>
         <Avatar mr={-1} size={"xs"} />
         <Avatar size={"xs"} /> <ChatIcon ml={"auto"} />
