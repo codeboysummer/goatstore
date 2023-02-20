@@ -61,9 +61,6 @@ const Form2 = () => {
 
   const toast = useToast();
   const tags = useSelector((state) => state.tags.value);
-  useEffect(() => {
-    console.log("tags:", tags);
-  }, [tags]);
 
   const handleChange = useCallback(
     debounce(async (event) => {
