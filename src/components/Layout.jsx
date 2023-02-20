@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { signOut } from "firebase/auth";
 import {
   IconButton,
@@ -20,6 +20,7 @@ import {
   MenuDivider,
   MenuItem,
   MenuList,
+  Heading,
 } from "@chakra-ui/react";
 import {
   FiHome,
@@ -37,6 +38,8 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "../firebase/firebase";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+
+import { BiMeteor } from "react-icons/bi";
 
 const LinkItems = [
   { name: "Dashboard", icon: FiHome },
@@ -164,6 +167,7 @@ const NavItem = ({ icon, children, ...rest }) => {
 const MobileNav = ({ onOpen, ...rest }) => {
   const username = useSelector((state) => state.username.value);
   const [user] = useAuthState(auth);
+  const [activeMeteor, setactiveMeteor] = useState(false);
   return (
     <Flex
       ml={{ base: 0, md: 60 }}
@@ -200,6 +204,13 @@ const MobileNav = ({ onOpen, ...rest }) => {
           aria-label="open menu"
           icon={<FiBell />}
         />
+        <HStack>
+          {<Heading size={"sm"}>gravity Mode</Heading>}
+          <BiMeteor
+            className=" cursor-pointer text-gray-400 hover:text-cyan-500"
+            size={32}
+          />
+        </HStack>
         <Flex alignItems={"center"}>
           <Menu>
             <MenuButton

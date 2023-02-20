@@ -7,6 +7,7 @@ import {
 import { Avatar, Box, Flex, HStack, Tag, VStack } from "@chakra-ui/react";
 import randomColor from "randomcolor";
 import React from "react";
+import { auth } from "../firebase/firebase";
 const Card = ({ card }) => {
   const [active, setactive] = React.useState(false);
   const { cardName, cardCompleted, tags } = card;
@@ -14,6 +15,9 @@ const Card = ({ card }) => {
     console.log("card", card);
   }, []);
 
+  function CompletedTask() {
+    const user = auth.currentUser();
+  }
   return (
     <VStack
       p={2}
@@ -27,13 +31,13 @@ const Card = ({ card }) => {
         {cardCompleted ? (
           <CheckIcon
             color={"grey"}
-            onClick={() => setactive(!active)}
+            onClick={() => {}}
             ml={"auto"}
             cursor={"pointer"}
           />
         ) : (
           <CheckCircleIcon
-            onClick={() => setactive(!active)}
+            onClick={() => {}}
             cursor={"pointer"}
             color={"green.400"}
             ml={"auto"}

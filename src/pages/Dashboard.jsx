@@ -66,22 +66,24 @@ const Dashboard = () => {
 
   return (
     <Layout>
-      <div className="flex flex-wrap gap-4">
+      <div className="flex flex-wrap gap-2 ">
         {/* <TrelloCard data={sampleData} /> */}
 
-        {lists?.map((item) => (
-          <TrelloCard TrelloCardData={item} />
-        ))}
+        <>
+          {lists?.map((item) => (
+            <TrelloCard TrelloCardData={item} />
+          ))}
 
-        <CreateList>
-          <IconButton
-            pos={"fixed"}
-            top={"11%"}
-            right={"1%"}
-            colorScheme={"twitter"}
-            icon={<AddIcon />}
-          />
-        </CreateList>
+          <CreateList>
+            <IconButton
+              pos={"fixed"}
+              top={"11%"}
+              right={"1%"}
+              colorScheme={"twitter"}
+              icon={<AddIcon />}
+            />
+          </CreateList>
+        </>
       </div>
     </Layout>
   );
