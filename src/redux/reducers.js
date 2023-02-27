@@ -70,9 +70,6 @@ const tagSlice = createSlice({
   initialState: { value: [] },
   reducers: {
     setTags: (state, action) => {
-      if (state.value.length > 0) {
-        state.value = [...state.value, action.payload];
-      }
       state.value = [action.payload];
     },
     addTag: (state, action) => {
@@ -96,6 +93,15 @@ const CardSlice = createSlice({
     },
   },
 });
+const activeMeteorSlice = createSlice({
+  name: "active",
+  initialState: { value: false },
+  reducers: {
+    setactive: (state, action) => {
+      state.value = action.payload;
+    },
+  },
+});
 // const sampleData = [
 //   {
 //     title: "💡 Ideas",
@@ -110,6 +116,7 @@ const CardSlice = createSlice({
 //   },
 // ];
 export const { setcards, addCards } = CardSlice.actions;
+export const { setactive } = activeMeteorSlice.actions;
 export const { setTags, addTag } = tagSlice.actions;
 export const { setcardName } = cardNameSlice.actions;
 export const { setcardCompleted } = cardCompletedSlice.actions;
@@ -130,4 +137,5 @@ export default {
   cardName: cardNameSlice.reducer,
   cardCompleted: cardCompletedSlice.reducer,
   tags: tagSlice.reducer,
+  active: activeMeteorSlice.reducer,
 };

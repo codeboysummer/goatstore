@@ -1,21 +1,25 @@
 import React, { useEffect, useRef, useState } from "react";
 import { AddIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import Card from "./Card";
-import { VStack } from "@chakra-ui/react";
+import { Button, useOutsideClick, VStack } from "@chakra-ui/react";
 import { ChakraModal } from "./ChakraModal";
 import { ref, update } from "firebase/database";
 import { auth, RealtimeDB } from "../firebase/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { useSelector } from "react-redux";
+import { remove, ref as referance } from "firebase/database";
 
 const TrelloCard = ({ TrelloCardData }) => {
   const { title } = TrelloCardData;
   const { cards } = TrelloCardData;
   const [user] = useAuthState(auth);
+  const active = useSelector((state) => state.active.value);
   const [windowPos, setWindowPos] = useState({
     x: window.innerWidth,
     y: window.innerHeight,
   });
+
   const myRef = useRef(null);
 
   useEffect(() => {
@@ -44,31 +48,66 @@ const TrelloCard = ({ TrelloCardData }) => {
   };
 
   const [cardsEmpty, setcardsEmpty] = useState(true);
-  useEffect(() => {
-    console.log("trellocard", cards);
-  }, []);
+  const [showDelete, setshowDelete] = useState(false);
+  const ref = React.useRef();
+  useOutsideClick({
+    ref: ref,
+    handler: () => setshowDelete(false),
+  });
+
   useEffect(() => {
     if (cards.length == 0) return setcardsEmpty(true);
     setcardsEmpty(false);
   }, [TrelloCardData, user]);
 
+  const onDelete = (title) => {
+    try {
+      remove(referance(RealtimeDB, `${user?.uid}/lists/${title}`));
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <>
       <motion.div
         ref={myRef}
-        drag={false}
+        drag={active}
         dragConstraints={dragConstraints}
         className=" bg-[#f3f3f3] w-72 h-fit rounded-lg p-1"
       >
-        <div className=" flex items-center pt-2 pb-2 ">
+        <div ref={ref} className=" flex items-center pt-2 pb-2 ">
           <p className=" text-gray-400 font-extrabold">
-            <ChevronRightIcon
-              cursor={"pointer"}
-              _hover={{ color: "red" }}
-              boxSize={7}
-            />
+            <motion.div onClick={() => setshowDelete(true)}>
+              {" "}
+              <ChevronRightIcon
+                cursor={"pointer"}
+                _hover={{ color: "red" }}
+                boxSize={7}
+              />
+            </motion.div>
           </p>{" "}
-          💡 <p className="pl-2 font-bold">{title}</p>
+          <AnimatePresence>
+            {showDelete ? (
+              <motion.div
+                initial={{ scale: 0.5 }}
+                animate={{ scale: 1 }}
+                exit={{ scale: 0.5 }}
+                transition={{ duration: 0.2 }}
+              >
+                <Button
+                  onClick={() => onDelete(title)}
+                  size={"sm"}
+                  as={motion.button}
+                  colorScheme={"red"}
+                >
+                  Delete
+                </Button>
+              </motion.div>
+            ) : (
+              <p className="pl-2 font-bold">{title}</p>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* this the card */}

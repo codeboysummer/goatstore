@@ -45,7 +45,7 @@ export default function Enter() {
       }
     } catch (error) {}
   };
-  
+
   useEffect(() => {
     if (user) {
       const { usernameExists, username } = alreadyExistingUser(user);

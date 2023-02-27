@@ -37,9 +37,10 @@ import { ChevronDownIcon } from "@chakra-ui/icons";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "../firebase/firebase";
 import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 import { BiMeteor } from "react-icons/bi";
+import { setactive } from "../redux/reducers";
 
 const LinkItems = [
   { name: "Dashboard", icon: FiHome },
@@ -167,7 +168,11 @@ const NavItem = ({ icon, children, ...rest }) => {
 const MobileNav = ({ onOpen, ...rest }) => {
   const username = useSelector((state) => state.username.value);
   const [user] = useAuthState(auth);
-  const [activeMeteor, setactiveMeteor] = useState(false);
+  const active = useSelector((state) => state.active.value);
+  const dispatch = useDispatch();
+  const handleClick = () => {
+    dispatch(setactive(!active));
+  };
   return (
     <Flex
       ml={{ base: 0, md: 60 }}
@@ -188,14 +193,17 @@ const MobileNav = ({ onOpen, ...rest }) => {
         icon={<FiMenu />}
       />
 
-      <Text
-        display={{ base: "flex", md: "none" }}
-        fontSize="2xl"
-        fontFamily="monospace"
-        fontWeight="bold"
-      >
-        Logo
-      </Text>
+      <HStack>
+        <SiSololearn className=" md:hidden sm:flex lg:hidden" />{" "}
+        <Text
+          display={{ base: "flex", md: "none" }}
+          fontSize="2xl"
+          fontFamily="monospace"
+          fontWeight="bold"
+        >
+          Trellow
+        </Text>
+      </HStack>
 
       <HStack spacing={{ base: "0", md: "6" }}>
         <IconButton
@@ -205,9 +213,13 @@ const MobileNav = ({ onOpen, ...rest }) => {
           icon={<FiBell />}
         />
         <HStack>
-          {<Heading size={"sm"}>gravity Mode</Heading>}
           <BiMeteor
-            className=" cursor-pointer text-gray-400 hover:text-cyan-500"
+            onClick={handleClick}
+            className={` cursor-pointer ${
+              !active
+                ? "text-gray-400 hover:text-cyan-500"
+                : "text-cyan-500 hover:text-gray-400"
+            } `}
             size={32}
           />
         </HStack>

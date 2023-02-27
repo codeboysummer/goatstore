@@ -29,6 +29,7 @@ import randomColor from "randomcolor";
 import { ref, update } from "firebase/database";
 import { auth, RealtimeDB } from "../firebase/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
+import { CloseIcon } from "@chakra-ui/icons";
 
 const Form1 = () => {
   const [show, setShow] = React.useState(false);
@@ -92,12 +93,19 @@ const Form2 = () => {
         <Flex>
           {tags?.map((item) => (
             <Tag
+              key={item}
               m={0.5}
               w={"fit-content"}
               color={"white"}
               bg={randomColor({ luminosity: "dark" })}
             >
               {item}
+              <CloseIcon
+                onClick={() => dispatch(setTags(tags.filter((i) => i != item)))}
+                cursor={"pointer"}
+                boxSize={2}
+                ml={2}
+              />
             </Tag>
           ))}
         </Flex>
@@ -121,6 +129,7 @@ export default function MultiStepForm({ title, cards, cardsEmpty }) {
   const [step, setStep] = useState(1);
   const [progress, setProgress] = useState(33.33);
   const [user] = useAuthState(auth);
+  const dispatch = useDispatch();
   const tags = useSelector((state) => state.tags.value);
   const cardName = useSelector((state) => state.cardName.value);
   const cardCompeleted = useSelector((state) => state.cardCompleted.value);
@@ -128,7 +137,7 @@ export default function MultiStepForm({ title, cards, cardsEmpty }) {
     console.log(title, cardName, cardCompeleted, tags);
   }, [cardName]);
 
-  function onSubmit() {
+  async function onSubmit(callback) {
     const CreatedCard = cardsEmpty
       ? {
           title,
@@ -155,10 +164,11 @@ export default function MultiStepForm({ title, cards, cardsEmpty }) {
         };
 
     try {
-      update(ref(RealtimeDB, `${user?.uid}/lists/${title}`), {
+      await update(ref(RealtimeDB, `${user?.uid}/lists/${title}`), {
         title,
         CreatedCard,
       });
+      callback();
     } catch (error) {
       console.log(error);
     }
@@ -222,7 +232,7 @@ export default function MultiStepForm({ title, cards, cardsEmpty }) {
                 colorScheme="red"
                 variant="solid"
                 onClick={async () => {
-                  onSubmit(title);
+                  onSubmit(dispatch(setTags([])));
                   toast({
                     title: "Account created.",
                     description: "We've created your account for you.",
