@@ -60,7 +60,6 @@ const Dashboard = () => {
       });
 
       setlists(lists);
-      console.log(lists);
     });
   }, [user]);
 

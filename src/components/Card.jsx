@@ -3,6 +3,7 @@ import {
   ChatIcon,
   CheckCircleIcon,
   CheckIcon,
+  CloseIcon,
 } from "@chakra-ui/icons";
 import { Avatar, Box, Flex, HStack, Tag, VStack } from "@chakra-ui/react";
 import randomColor from "randomcolor";
@@ -11,9 +12,6 @@ import { auth } from "../firebase/firebase";
 const Card = ({ card }) => {
   const [active, setactive] = React.useState(false);
   const { cardName, cardCompleted, tags } = card;
-  React.useEffect(() => {
-    console.log("card", card);
-  }, []);
 
   function CompletedTask() {
     const user = auth.currentUser();
