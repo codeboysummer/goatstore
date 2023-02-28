@@ -115,13 +115,7 @@ const Form2 = () => {
 };
 
 const Form3 = () => {
-  return (
-    <>
-      <Heading w="100%" textAlign={"center"} fontWeight="normal">
-        Social Handles
-      </Heading>
-    </>
-  );
+  return <></>;
 };
 
 export default function MultiStepForm({ title, cards, cardsEmpty }) {
@@ -209,22 +203,23 @@ export default function MultiStepForm({ title, cards, cardsEmpty }) {
               >
                 Back
               </Button>
-              <Button
-                w="7rem"
-                isDisabled={step === 3}
-                onClick={() => {
-                  setStep(step + 1);
-                  if (step === 3) {
-                    setProgress(100);
-                  } else {
-                    setProgress(progress + 33.33);
-                  }
-                }}
-                colorScheme="teal"
-                variant="outline"
-              >
-                Next
-              </Button>
+              {step != 3 && (
+                <Button
+                  w="7rem"
+                  onClick={() => {
+                    setStep(step + 1);
+                    if (step === 3) {
+                      setProgress(100);
+                    } else {
+                      setProgress(progress + 33.33);
+                    }
+                  }}
+                  colorScheme="teal"
+                  variant="outline"
+                >
+                  Next
+                </Button>
+              )}
             </Flex>
             {step === 3 ? (
               <Button

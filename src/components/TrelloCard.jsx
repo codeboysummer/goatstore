@@ -113,10 +113,10 @@ const TrelloCard = ({ TrelloCardData }) => {
         {/* this the card */}
 
         <VStack>
-          {cards?.map((card) => {
+          {cards?.map((card, i) => {
             return (
               <>
-                <Card key={card} card={card} />
+                <Card key={i} cardIndex={i} card={card} ParentTitle={title} />
               </>
             );
           })}

@@ -5,24 +5,73 @@ import {
   CheckIcon,
   CloseIcon,
 } from "@chakra-ui/icons";
-import { Avatar, Box, Flex, HStack, Tag, VStack } from "@chakra-ui/react";
+import {
+  Avatar,
+  Box,
+  Button,
+  Flex,
+  HStack,
+  Tag,
+  useOutsideClick,
+  VStack,
+} from "@chakra-ui/react";
+import { remove, ref as referance } from "firebase/database";
+import { motion } from "framer-motion";
 import randomColor from "randomcolor";
 import React from "react";
-import { auth } from "../firebase/firebase";
-const Card = ({ card }) => {
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth, RealtimeDB } from "../firebase/firebase";
+const Card = ({ card, cardIndex, ParentTitle }) => {
   const [active, setactive] = React.useState(false);
   const { cardName, cardCompleted, tags } = card;
+  const [user] = useAuthState(auth);
+  const deleteCard = (cardIndex) => {
+    try {
+      remove(
+        referance(
+          RealtimeDB,
+          `${user?.uid}/lists/${ParentTitle}/CreatedCard/cards/${cardIndex}`
+        )
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
-  function CompletedTask() {
-    const user = auth.currentUser();
-  }
+  const ref = React.useRef();
+  useOutsideClick({
+    ref: ref,
+    handler: () => setactive(false),
+  });
+
+  const collapsed = {
+    padding: 2,
+    borderRadius: 4,
+    justifyContent: "center",
+    background: "white",
+    width: "95%",
+  };
+  const animate = {
+    width: "90vw",
+    height: "40vh",
+    position: "absolute",
+    marginLeft: "auto",
+    marginRight: "auto",
+    left: 0,
+    right: 0,
+    textAlign: "center",
+    zIndex: 999,
+    background: "black",
+    color: "white",
+  };
+
   return (
     <VStack
-      p={2}
-      borderRadius={4}
-      justifyContent={"center"}
-      bg={"white"}
-      w={"95%"}
+      ref={ref}
+      onClick={() => setactive(true)}
+      as={motion.div}
+      {...collapsed}
+      animate={active ? animate : ""}
     >
       <Flex w={"100%"} alignItems={"center"}>
         <p className="self-start  font-medium">{cardName}</p>
@@ -57,6 +106,18 @@ const Card = ({ card }) => {
         <Avatar mr={-1} size={"xs"} />
         <Avatar size={"xs"} /> <ChatIcon ml={"auto"} />
       </Flex>
+      {active && (
+        <Button
+          top={0}
+          size={"sm"}
+          right={1}
+          position={"absolute"}
+          colorScheme={"red"}
+          onClick={() => deleteCard(cardIndex)}
+        >
+          delete
+        </Button>
+      )}
     </VStack>
   );
 };
