@@ -102,6 +102,16 @@ const activeMeteorSlice = createSlice({
     },
   },
 });
+const currentBoardSlice = createSlice({
+  name: "currentBoard",
+  initialState: { value: null },
+  reducers: {
+    setcurrentBoard: (state, action) => {
+      state.value = action.payload;
+    },
+  },
+});
+
 // const sampleData = [
 //   {
 //     title: "💡 Ideas",
@@ -116,6 +126,7 @@ const activeMeteorSlice = createSlice({
 //   },
 // ];
 export const { setcards, addCards } = CardSlice.actions;
+export const { setcurrentBoard } = currentBoardSlice.actions;
 export const { setactive } = activeMeteorSlice.actions;
 export const { setTags, addTag } = tagSlice.actions;
 export const { setcardName } = cardNameSlice.actions;
@@ -138,4 +149,5 @@ export default {
   cardCompleted: cardCompletedSlice.reducer,
   tags: tagSlice.reducer,
   active: activeMeteorSlice.reducer,
+  currentBoard: currentBoardSlice.reducer,
 };
