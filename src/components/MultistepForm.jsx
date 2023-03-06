@@ -158,7 +158,7 @@ export default function MultiStepForm({ title, cards, cardsEmpty }) {
         };
 
     try {
-      await update(ref(RealtimeDB, `${user?.uid}/lists/${title}`), {
+      await update(ref(RealtimeDB, `users/${user?.uid}/lists/${title}`), {
         title,
         CreatedCard,
       });

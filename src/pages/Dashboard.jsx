@@ -11,7 +11,9 @@ import {
   Stack,
   useDisclosure,
   useToast,
+  VStack,
 } from "@chakra-ui/react";
+import { FaUserFriends } from "react-icons/fa";
 import React, { useEffect, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useNavigate } from "react-router-dom";
@@ -37,7 +39,7 @@ const Dashboard = () => {
       return;
     }
 
-    onValue(referance(RealtimeDB, `${user.uid}/lists`), (snapshot) => {
+    onValue(referance(RealtimeDB, `users/${user.uid}/lists`), (snapshot) => {
       const data = snapshot.val();
       if (!data) {
         setlists([]);
@@ -74,13 +76,9 @@ const Dashboard = () => {
           ))}
 
           <CreateList>
-            <IconButton
-              pos={"fixed"}
-              top={"11%"}
-              right={"1%"}
-              colorScheme={"twitter"}
-              icon={<AddIcon />}
-            />
+            <VStack pos={"fixed"} top={"11%"} right={"1%"}>
+              <IconButton colorScheme={"twitter"} icon={<AddIcon />} />
+            </VStack>
           </CreateList>
         </>
       </div>
@@ -106,16 +104,16 @@ function CreateList({ children }) {
           title: "title must have a 1 character",
           duration: 2000,
         });
-      set(referance(RealtimeDB, `${user?.uid}/lists/${title}`), {
+      await set(referance(RealtimeDB, `users/${user?.uid}/lists/${title}`), {
         title,
       });
 
-      settitle("");
       toast({
         status: "success",
         title: `${title} was created`,
         duration: 1000,
       });
+      settitle("");
     } catch (error) {
       console.log(error);
     }
