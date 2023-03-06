@@ -1,3 +1,4 @@
+import { SettingsIcon } from "@chakra-ui/icons";
 import {
   AbsoluteCenter,
   Box,
@@ -5,26 +6,52 @@ import {
   Center,
   Heading,
   HStack,
+  IconButton,
   Input,
   Text,
   useAccordionItem,
+  useDisclosure,
   useToast,
   VStack,
 } from "@chakra-ui/react";
+import {
+  Drawer,
+  DrawerBody,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerOverlay,
+  DrawerContent,
+  DrawerCloseButton,
+} from "@chakra-ui/react";
+import { current } from "@reduxjs/toolkit";
 import { set, ref as referance, onValue } from "firebase/database";
+import { motion, animate, useAnimation } from "framer-motion";
 import { rearg } from "lodash";
 import randomColor from "randomcolor";
 import React, { useEffect, useRef, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Colorpicker } from "../components/Colorpicker";
 import Layout from "../components/Layout";
 import { auth, RealtimeDB } from "../firebase/firebase";
 import { setcurrentBoard } from "../redux/reducers";
+import { remove } from "firebase/database";
+import {
+  Editable,
+  EditableInput,
+  EditableTextarea,
+  EditablePreview,
+} from "@chakra-ui/react";
 
 const Boards = () => {
   const [boards, setboards] = useState([]);
   const [color, setColor] = useState("gray.500");
+  const [formValue, setformValue] = useState("");
+  const [selected, setSelected] = useState("");
+  const controls = useAnimation();
+  const currentBoard = useSelector((state) => state.currentBoard.value);
+  const toast = useToast();
+  const dispatch = useDispatch();
 
   // needs useeffect to fetch boards
   const [user] = useAuthState(auth);
@@ -34,7 +61,7 @@ const Boards = () => {
       return;
     }
 
-    onValue(referance(RealtimeDB, `${user.uid}/boards`), (snapshot) => {
+    onValue(referance(RealtimeDB, `users/${user.uid}/boards`), (snapshot) => {
       const data = snapshot.val();
       if (!data) {
         setboards([]);
@@ -57,13 +84,6 @@ const Boards = () => {
 
   // so if boards are not there we ask the user to create them
 
-  const [formValue, setformValue] = useState("");
-  const toast = useToast();
-  // make this a component and keep track of of it buy a
-  //global variable called current board which will the the name
-
-  // of the current board
-
   const createBoard = async (color) => {
     try {
       if (!formValue || formValue.length === 0)
@@ -75,7 +95,7 @@ const Boards = () => {
 
       const boardRef = referance(
         RealtimeDB,
-        `${user?.uid}/boards/${formValue}`
+        `users/${user?.uid}/boards/${formValue}`
       );
       await set(boardRef, { boardTitle: formValue, color: color });
 
@@ -89,10 +109,6 @@ const Boards = () => {
       console.log(error);
     }
   };
-  const bgStyle = {
-    background: `linear-gradient(to right, ${randomColor()}, ${randomColor()})`,
-  };
-  const dispatch = useDispatch();
 
   return (
     <Layout>
@@ -120,17 +136,31 @@ const Boards = () => {
           </Heading>
         </VStack>
       )}
+
       <Heading>Boards</Heading>
-      <HStack mt={10}>
-        {boards?.map((item) => (
+      <HStack justifyItems={"space-between"} w={"100%"} mt={10}>
+        {boards?.map((item, index) => (
           <Box
+            key={index}
+            w={500}
+            h={100}
             bg={item.color}
+            animate={{ width: selected === item ? 100 : 200 }}
+            transition={{ duration: 0.3 }}
+            as={motion.div}
             cursor={"pointer"}
-            w={40}
             borderRadius={"3xl"}
-            h={40}
-            onClick={() => dispatch(setcurrentBoard(item.id))}
+            position={"relative"}
           >
+            <ChakraDrawer board={item}>
+              <IconButton
+                className="absolute top-0 right-0 -mt-2 -mr-2"
+                size={"sm"}
+                rounded={"full"}
+                bg={"white"}
+                icon={<SettingsIcon />}
+              />
+            </ChakraDrawer>
             <Center h={"100%"} w={"100%"}>
               <Heading size={"md"} color={"white"}>
                 {item.title}
@@ -144,3 +174,67 @@ const Boards = () => {
 };
 
 export default Boards;
+
+function ChakraDrawer({ children, board }) {
+  const [user] = useAuthState(auth);
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const btnRef = React.useRef();
+  const { title } = board;
+  const getBoardData = async (title) => {};
+
+  const deleteBoard = async (title) => {
+    try {
+      remove(referance(RealtimeDB, `users/${user?.uid}/boards/${title}`));
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  useEffect(() => {
+    onValue(
+      referance(RealtimeDB, `users/${user.uid}/boards/${title}`),
+      (snapshot) => {
+        const data = snapshot.val();
+        console.log(data);
+      }
+    );
+  }, []);
+
+  return (
+    <>
+      <div onClick={onOpen} ref={btnRef}>
+        {children}
+      </div>
+      <Drawer
+        isOpen={isOpen}
+        placement="bottom"
+        onClose={onClose}
+        finalFocusRef={btnRef}
+        size={"full"}
+      >
+        <DrawerOverlay />
+        <DrawerContent>
+          <DrawerCloseButton />
+          <DrawerHeader>
+            <Editable defaultValue={title}>
+              <EditablePreview bg={"gray.100"} />
+              <EditableInput />
+            </Editable>
+          </DrawerHeader>
+
+          <DrawerBody>
+            <p>this is a tree</p>
+          </DrawerBody>
+
+          <DrawerFooter>
+            <Button variant="outline" mr={3} onClick={onClose}>
+              Cancel
+            </Button>
+            <Button colorScheme="red" onClick={() => deleteBoard(title)}>
+              Delete
+            </Button>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
+    </>
+  );
+}
