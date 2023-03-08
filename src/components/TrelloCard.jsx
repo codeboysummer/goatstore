@@ -62,7 +62,7 @@ const TrelloCard = ({ TrelloCardData }) => {
 
   const onDelete = (title) => {
     try {
-      remove(referance(RealtimeDB, `${user?.uid}/lists/${title}`));
+      remove(referance(RealtimeDB, `users/${user?.uid}/boards/${title}`));
     } catch (error) {
       console.log(error);
     }

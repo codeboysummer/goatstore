@@ -43,6 +43,7 @@ import {
   EditablePreview,
 } from "@chakra-ui/react";
 import DiagramTree from "../components/DiagramTree";
+import { getBoardRef } from "../Globals/globals";
 
 const Boards = () => {
   const [boards, setboards] = useState([]);
@@ -151,7 +152,6 @@ const Boards = () => {
             bg={item.color}
             animate={{ width: selected === item ? 100 : 200 }}
             transition={{ duration: 0.3 }}
-            onClick={() => dispatch(setcurrentBoard(item.title))}
             as={motion.div}
             cursor={"pointer"}
             borderRadius={"3xl"}
@@ -166,7 +166,11 @@ const Boards = () => {
                 icon={<SettingsIcon />}
               />
             </ChakraDrawer>
-            <Center h={"100%"} w={"100%"}>
+            <Center
+              onClick={() => dispatch(setcurrentBoard(item.title))}
+              h={"100%"}
+              w={"100%"}
+            >
               <Heading size={"md"} color={"white"}>
                 {item.title}
               </Heading>

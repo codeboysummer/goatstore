@@ -20,17 +20,19 @@ import { motion } from "framer-motion";
 import randomColor from "randomcolor";
 import React from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
+import { useSelector } from "react-redux";
 import { auth, RealtimeDB } from "../firebase/firebase";
 const Card = ({ card, cardIndex, ParentTitle }) => {
   const [active, setactive] = React.useState(false);
   const { cardName, cardCompleted, tags } = card;
   const [user] = useAuthState(auth);
+  const currentBoard = useSelector((state) => state.currentBoard.value);
   const deleteCard = (cardIndex) => {
     try {
       remove(
         referance(
           RealtimeDB,
-          `${user?.uid}/lists/${ParentTitle}/CreatedCard/cards/${cardIndex}`
+          `users/${user?.uid}/boards/${currentBoard}/lists/${ParentTitle}/CreatedCard/cards/${cardIndex}`
         )
       );
     } catch (error) {

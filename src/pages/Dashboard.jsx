@@ -1,4 +1,4 @@
-import { AddIcon, CheckIcon } from "@chakra-ui/icons";
+import { AddIcon, ArrowBackIcon, CheckIcon } from "@chakra-ui/icons";
 import {
   Box,
   Button,
@@ -31,14 +31,14 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import Boards from "./Boards";
 import { setcurrentBoard } from "../redux/reducers";
-import { current } from "@reduxjs/toolkit";
 
 const Dashboard = () => {
   const [user] = useAuthState(auth);
   const navigate = useNavigate();
   const [lists, setlists] = useState([]);
-
+  const dispatch = useDispatch();
   const currentBoard = useSelector((state) => state.currentBoard.value);
+
   useEffect(() => {
     if (!user) {
       return;
@@ -72,7 +72,7 @@ const Dashboard = () => {
       }
     );
   }, [user]);
-  const dispatch = useDispatch();
+
   useEffect(() => {
     console.log(currentBoard);
   }, [currentBoard]);
@@ -100,7 +100,7 @@ const Dashboard = () => {
                 left={"1%"}
                 onClick={() => dispatch(setcurrentBoard(null))}
                 colorScheme={"twitter"}
-                icon={<AddIcon />}
+                icon={<ArrowBackIcon />}
               />
             </>
           </div>
@@ -134,7 +134,7 @@ function CreateList({ children }) {
           duration: 2000,
         });
       await set(
-        referance(RealtimeDB, `users/${user?.uid}/${currentBoard}/${title}`),
+        referance(RealtimeDB, `users/${user?.uid}/boards/${currentBoard}`),
         {
           title,
         }

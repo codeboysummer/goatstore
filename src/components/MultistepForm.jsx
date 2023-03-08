@@ -127,6 +127,7 @@ export default function MultiStepForm({ title, cards, cardsEmpty }) {
   const tags = useSelector((state) => state.tags.value);
   const cardName = useSelector((state) => state.cardName.value);
   const cardCompeleted = useSelector((state) => state.cardCompleted.value);
+  const currentBoard = useSelector((state) => state.currentBoard.value);
   useEffect(() => {
     console.log(title, cardName, cardCompeleted, tags);
   }, [cardName]);
@@ -158,10 +159,13 @@ export default function MultiStepForm({ title, cards, cardsEmpty }) {
         };
 
     try {
-      await update(ref(RealtimeDB, `users/${user?.uid}/lists/${title}`), {
-        title,
-        CreatedCard,
-      });
+      await update(
+        ref(RealtimeDB, `users/${user?.uid}/boards/${currentBoard}/TrelloCard`),
+        {
+          title,
+          CreatedCard,
+        }
+      );
       callback();
     } catch (error) {
       console.log(error);
