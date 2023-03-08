@@ -28,60 +28,88 @@ import {
   remove,
   update,
 } from "firebase/database";
+import { useDispatch, useSelector } from "react-redux";
+import Boards from "./Boards";
+import { setcurrentBoard } from "../redux/reducers";
+import { current } from "@reduxjs/toolkit";
 
 const Dashboard = () => {
   const [user] = useAuthState(auth);
   const navigate = useNavigate();
   const [lists, setlists] = useState([]);
 
+  const currentBoard = useSelector((state) => state.currentBoard.value);
   useEffect(() => {
     if (!user) {
       return;
     }
 
-    onValue(referance(RealtimeDB, `users/${user.uid}/lists`), (snapshot) => {
-      const data = snapshot.val();
-      if (!data) {
-        setlists([]);
-        return;
+    onValue(
+      referance(RealtimeDB, `users/${user.uid}/${currentBoard}`),
+      (snapshot) => {
+        const data = snapshot.val();
+        if (!data) {
+          setlists([]);
+          return;
+        }
+
+        const lists = Object.entries(data).map(([key, value]) => {
+          const title = value.title || key;
+
+          const cardsData = value.CreatedCard?.cards;
+          const cards = cardsData
+            ? Object.entries(cardsData).map(([cardKey, cardValue]) => ({
+                cardCompleted: cardValue.cardCompleted || false,
+                cardName: cardValue.cardName || "",
+                tags: cardValue.tags || [],
+              }))
+            : [];
+          console.log(data);
+          return { title, cards };
+        });
+
+        setlists(lists);
       }
-
-      const lists = Object.entries(data).map(([key, value]) => {
-        const title = value.title || key;
-
-        const cardsData = value.CreatedCard?.cards;
-        const cards = cardsData
-          ? Object.entries(cardsData).map(([cardKey, cardValue]) => ({
-              cardCompleted: cardValue.cardCompleted || false,
-              cardName: cardValue.cardName || "",
-              tags: cardValue.tags || [],
-            }))
-          : [];
-
-        return { title, cards };
-      });
-
-      setlists(lists);
-    });
+    );
   }, [user]);
+  const dispatch = useDispatch();
+  useEffect(() => {
+    console.log(currentBoard);
+  }, [currentBoard]);
 
   return (
     <Layout>
-      <div className="flex flex-wrap gap-2 ">
-        {/* <TrelloCard data={sampleData} /> */}
-
+      {currentBoard ? (
         <>
-          {lists?.map((item) => (
-            <TrelloCard TrelloCardData={item} />
-          ))}
+          <div className="flex flex-wrap gap-2 ">
+            {/* <TrelloCard data={sampleData} /> */}
 
-          <CreateList>
-            <VStack pos={"fixed"} top={"11%"} right={"1%"}>
-              <IconButton colorScheme={"twitter"} icon={<AddIcon />} />
-            </VStack>
-          </CreateList>
+            <>
+              {lists?.map((item) => (
+                <TrelloCard TrelloCardData={item} />
+              ))}
+
+              <CreateList>
+                <VStack pos={"fixed"} top={"11%"} right={"1%"}>
+                  <IconButton colorScheme={"twitter"} icon={<AddIcon />} />
+                </VStack>
+              </CreateList>
+              <IconButton
+                pos={"fixed"}
+                top={"11%"}
+                left={"1%"}
+                onClick={() => dispatch(setcurrentBoard(null))}
+                colorScheme={"twitter"}
+                icon={<AddIcon />}
+              />
+            </>
+          </div>
         </>
-      </div>
+      ) : (
+        <>
+          <Boards />
+        </>
+      )}
     </Layout>
   );
 };
@@ -94,6 +122,7 @@ function CreateList({ children }) {
   const [user] = useAuthState(auth);
   const toast = useToast();
   const ref = React.useRef();
+  const currentBoard = useSelector((state) => state.currentBoard.value);
 
   const [title, settitle] = useState("");
   const CreateList = async () => {
@@ -104,9 +133,12 @@ function CreateList({ children }) {
           title: "title must have a 1 character",
           duration: 2000,
         });
-      await set(referance(RealtimeDB, `users/${user?.uid}/lists/${title}`), {
-        title,
-      });
+      await set(
+        referance(RealtimeDB, `users/${user?.uid}/${currentBoard}/${title}`),
+        {
+          title,
+        }
+      );
 
       toast({
         status: "success",

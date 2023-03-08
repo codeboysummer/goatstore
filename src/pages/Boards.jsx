@@ -42,6 +42,7 @@ import {
   EditableTextarea,
   EditablePreview,
 } from "@chakra-ui/react";
+import DiagramTree from "../components/DiagramTree";
 
 const Boards = () => {
   const [boards, setboards] = useState([]);
@@ -109,9 +110,12 @@ const Boards = () => {
       console.log(error);
     }
   };
+  useEffect(() => {
+    console.log(currentBoard);
+  }, [currentBoard]);
 
   return (
-    <Layout>
+    <>
       <VStack w={"100%"}>
         <Heading>Welcome to trellow </Heading>
         <Text>lets start you off with your first board</Text>
@@ -147,6 +151,7 @@ const Boards = () => {
             bg={item.color}
             animate={{ width: selected === item ? 100 : 200 }}
             transition={{ duration: 0.3 }}
+            onClick={() => dispatch(setcurrentBoard(item.title))}
             as={motion.div}
             cursor={"pointer"}
             borderRadius={"3xl"}
@@ -169,7 +174,7 @@ const Boards = () => {
           </Box>
         ))}
       </HStack>
-    </Layout>
+    </>
   );
 };
 
@@ -180,18 +185,20 @@ function ChakraDrawer({ children, board }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const btnRef = React.useRef();
   const { title } = board;
-  const getBoardData = async (title) => {};
+  const currentBoard = useSelector((state) => state.currentBoard.value);
 
   const deleteBoard = async (title) => {
     try {
-      remove(referance(RealtimeDB, `users/${user?.uid}/boards/${title}`));
+      remove(
+        referance(RealtimeDB, `users/${user?.uid}/${currentBoard}/${title}`)
+      );
     } catch (error) {
       console.log(error);
     }
   };
   useEffect(() => {
     onValue(
-      referance(RealtimeDB, `users/${user.uid}/boards/${title}`),
+      referance(RealtimeDB, `users/${user.uid}/${currentBoard}/${title}`),
       (snapshot) => {
         const data = snapshot.val();
         console.log(data);
@@ -223,6 +230,7 @@ function ChakraDrawer({ children, board }) {
 
           <DrawerBody>
             <p>this is a tree</p>
+            <DiagramTree />
           </DrawerBody>
 
           <DrawerFooter>
