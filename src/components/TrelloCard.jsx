@@ -9,12 +9,18 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSelector } from "react-redux";
 import { remove, ref as referance } from "firebase/database";
+import CreateCardModal from "./CreateCardModal";
 
 const TrelloCard = ({ TrelloCardData }) => {
   const { title } = TrelloCardData;
   const { cards } = TrelloCardData;
   const [user] = useAuthState(auth);
   const active = useSelector((state) => state.active.value);
+
+  useEffect(() => {
+    console.log(TrelloCardData);
+  }, []);
+
   const [windowPos, setWindowPos] = useState({
     x: window.innerWidth,
     y: window.innerHeight,
@@ -56,7 +62,7 @@ const TrelloCard = ({ TrelloCardData }) => {
   });
 
   useEffect(() => {
-    if (cards.length == 0) return setcardsEmpty(true);
+    if (cards?.length == 0) return setcardsEmpty(true);
     setcardsEmpty(false);
   }, [TrelloCardData, user]);
 
@@ -120,9 +126,13 @@ const TrelloCard = ({ TrelloCardData }) => {
               </>
             );
           })}
-          <ChakraModal cardsEmpty={cardsEmpty} cards={cards} title={title}>
+          {/* <ChakraModal cardsEmpty={cardsEmpty} cards={cards} title={title}>
             <AddIcon pt={1} cursor={"pointer"} color={"grey"} />
-          </ChakraModal>
+          </ChakraModal> */}
+
+          <CreateCardModal item={TrelloCardData}>
+            <AddIcon pt={1} cursor={"pointer"} color={"grey"} />
+          </CreateCardModal>
         </VStack>
       </motion.div>
     </>

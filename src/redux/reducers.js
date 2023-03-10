@@ -111,6 +111,15 @@ const currentBoardSlice = createSlice({
     },
   },
 });
+const currentListDataSlice = createSlice({
+  name: "currentList",
+  initialState: { value: null },
+  reducers: {
+    setcurrentList: (state, action) => {
+      state.value = action.payload;
+    },
+  },
+});
 
 // const sampleData = [
 //   {
@@ -126,6 +135,7 @@ const currentBoardSlice = createSlice({
 //   },
 // ];
 export const { setcards, addCards } = CardSlice.actions;
+export const { setcurrentList } = currentListDataSlice.actions;
 export const { setcurrentBoard } = currentBoardSlice.actions;
 export const { setactive } = activeMeteorSlice.actions;
 export const { setTags, addTag } = tagSlice.actions;
@@ -139,6 +149,7 @@ export const { setemail } = emailInputSlice.actions;
 export const { setUsername } = usernameSlice.actions;
 
 export default {
+  currentList: currentListDataSlice.reducer,
   cards: CardSlice.reducer,
   user: userSlice.reducer,
   usernameIsValid: userNameValidity.reducer,

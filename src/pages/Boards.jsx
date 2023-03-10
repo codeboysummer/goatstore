@@ -26,13 +26,10 @@ import {
 import { current } from "@reduxjs/toolkit";
 import { set, ref as referance, onValue } from "firebase/database";
 import { motion, animate, useAnimation } from "framer-motion";
-import { rearg } from "lodash";
-import randomColor from "randomcolor";
 import React, { useEffect, useRef, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useDispatch, useSelector } from "react-redux";
 import { Colorpicker } from "../components/Colorpicker";
-import Layout from "../components/Layout";
 import { auth, RealtimeDB } from "../firebase/firebase";
 import { setcurrentBoard } from "../redux/reducers";
 import { remove } from "firebase/database";
@@ -43,7 +40,6 @@ import {
   EditablePreview,
 } from "@chakra-ui/react";
 import DiagramTree from "../components/DiagramTree";
-import { getBoardRef } from "../Globals/globals";
 
 const Boards = () => {
   const [boards, setboards] = useState([]);

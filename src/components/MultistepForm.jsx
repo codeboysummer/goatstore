@@ -66,7 +66,7 @@ const Form2 = () => {
   const handleChange = useCallback(
     debounce(async (event) => {
       const { value } = event.target;
-      if (tags.length > 4) {
+      if (tags?.length > 4) {
         return toast({ title: "limit of 5 reached" });
       }
       if (!value || value.length <= 2) {
@@ -128,9 +128,7 @@ export default function MultiStepForm({ title, cards, cardsEmpty }) {
   const cardName = useSelector((state) => state.cardName.value);
   const cardCompeleted = useSelector((state) => state.cardCompleted.value);
   const currentBoard = useSelector((state) => state.currentBoard.value);
-  useEffect(() => {
-    console.log(title, cardName, cardCompeleted, tags);
-  }, [cardName]);
+  useEffect(() => {}, [cardName]);
 
   async function onSubmit(callback) {
     const CreatedCard = cardsEmpty
@@ -159,7 +157,7 @@ export default function MultiStepForm({ title, cards, cardsEmpty }) {
         };
 
     try {
-      await update(
+      await set(
         ref(RealtimeDB, `users/${user?.uid}/boards/${currentBoard}/TrelloCard`),
         {
           title,
